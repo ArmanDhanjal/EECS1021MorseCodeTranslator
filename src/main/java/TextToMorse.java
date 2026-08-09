@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -25,25 +26,27 @@ public class TextToMorse {
         System.out.println("Connected successfully.\n");
 
         boolean cont = true;
-        boolean valid = false;
-        String contAns = "temp";
+        boolean valid;
+        String contAns;
 
         while (cont) {
             valid = false;
 
-            // TODO 1: Ask user to input a string of what they want translated to morse code.
+            // (Complete) TODO 1: Ask user to input a string of what they want translated to morse code.
 
             System.out.println("Please input the message you wish to translate to morse code (no special characters):");
             String message = scanner.nextLine();
 
-            // TODO 2: clean string input (use created method).
+            // (Complete) TODO 2: clean string input (use created method).
 
             char[] cleanMessage = cleanInput(message);
 
-            // TODO 3: for loop to iterate through the string and get the corresponding character value in morse code.
+            // (Complete) TODO 3: for loop to iterate through the string and get the corresponding character value in morse code.
             //       save each new value as an array of strings (implement in convertToMorse() method).
             //       if encounter a space: save it in the same position as where it is in the original string.
             //       if encounter a special character (ex $, %, etc): getter method will return null; do not add to array.
+
+            List<String> morseMessage = convertToMorse(cleanMessage, directory);
 
             // TODO 4: iterate through new array and use the pico's onboard LED to blink, using the constants above.
             //       if encounter a space: ensure led is off and pause for BETWEEN_WORDS ms.
@@ -76,7 +79,24 @@ public class TextToMorse {
     //      - each original letter (char) gets converted to a string, and each string is an individual entry.
     //      - can use nexted for loops: 1 loop for each list entry, the other for iterate through the string.
     public static List<String> convertToMorse(char[] c, MorseDirectory directory){
-        return null;
+        List<String> translated = new ArrayList<>();
+
+        for (char currentChar : c) {
+            if (currentChar == ' ') {
+                translated.add(" ");
+            }
+            else {
+                String temp = directory.getMorseSequence(currentChar);
+
+                if (temp != null) {
+                    translated.add(temp);
+                }
+                else {
+                    System.out.println("Invalid character element detected, skipping to next character...");
+                }
+            }
+        }
+        return translated;
     }
 
     // Method to tell pico to execute a short blink for dots.
