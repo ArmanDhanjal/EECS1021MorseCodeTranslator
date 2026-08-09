@@ -9,12 +9,12 @@ public class TextToMorse {
     private static final int BETWEEN_ELEMENTS = 200; // Time the LED is off between dots/dashes of the same letter.
     private static final int BETWEEN_WORDS = 1400; // Time the LED is off between whole words (spaces).
 
-    public static void main(String[] args){
-        Scanner scanner =  new Scanner(System.in);
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
 
         MorseDirectory directory = new MorseDirectory();
 
-        PicoController pico = new  PicoController();
+        PicoController pico = new PicoController();
 
         System.out.println("Connecting to Pico...");
         if (!pico.connect()) {
@@ -24,18 +24,45 @@ public class TextToMorse {
         }
         System.out.println("Connected successfully.\n");
 
+        boolean cont = true;
+        boolean valid = false;
+        String contAns = "temp";
 
-        // TODO: Ask user to input a string of what they want translated to morse code.
+        while (cont) {
+            valid = false;
 
-        // TODO: clean string input (use created method).
+            // TODO 1: Ask user to input a string of what they want translated to morse code.
 
-        // TODO: for loop to iterate through the string and get the corresponding character value in morse code.
-        //       save each new value as an array of strings (implement in convertToMorse() method).
-        //       if encounter a space: save it in the same position as where it is in the original string.
-        //       if encounter a special character (ex $, %, etc): getter method will return null; do not add to array.
+            System.out.println("Please input the message you wish to translate to morse code (no special characters):");
+            String message = scanner.nextLine();
 
-        // TODO: iterate through new array and use the pico's onboard LED to blink, using the constants above.
-        //       if encounter a space: ensure led is off and pause for BETWEEN_WORDS ms.
+            // TODO 2: clean string input (use created method).
+
+            // TODO 3: for loop to iterate through the string and get the corresponding character value in morse code.
+            //       save each new value as an array of strings (implement in convertToMorse() method).
+            //       if encounter a space: save it in the same position as where it is in the original string.
+            //       if encounter a special character (ex $, %, etc): getter method will return null; do not add to array.
+
+            // TODO 4: iterate through new array and use the pico's onboard LED to blink, using the constants above.
+            //       if encounter a space: ensure led is off and pause for BETWEEN_WORDS ms.
+
+            while (!valid)
+            {
+                System.out.println("Do you wish to continue (y/n)?");
+                contAns = scanner.nextLine();
+
+                if (contAns.equals("y") ||  contAns.equals("n")) {
+                    if (contAns.equals("n")) {
+                        cont = false;
+                        System.out.println("Exiting Application...");
+                    }
+                    valid = true;
+                }
+                else  {
+                    System.out.println("Invalid input. Try again.");
+                }
+            }
+        }
     }
 
     // Method is used to clean the string input, then convert it into a character array for simpler iterate.
