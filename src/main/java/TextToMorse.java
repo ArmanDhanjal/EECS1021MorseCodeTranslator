@@ -127,20 +127,18 @@ public class TextToMorse {
 
     // Method to tell pico to execute a short blink for dots.
     public static void shortBlink(PicoController pico){
-        pico.timerStart(DOT_TIME, "TOGGLE");
+        pico.ledOn();
         pico.sleep(DOT_TIME);
 
-        pico.timerStop();
         pico.ledOff();
         pico.sleep(BETWEEN_ELEMENTS);
     }
 
     // Method to tell pico to execute a short blink for dashes.
     public static void longBlink(PicoController pico){
-        pico.timerStart(DASH_TIME, "TOGGLE");
+        pico.ledOn();
         pico.sleep(DASH_TIME);
 
-        pico.timerStop();
         pico.ledOff();
         pico.sleep(BETWEEN_ELEMENTS);
     }

@@ -1,0 +1,262 @@
+=================================================================================================================
+EECS 1021 FINAL PROJECT TESTING LOG
+=================================================================================================================
+
+Issue 1 --> LED Blinks Out of Sync
+
+To diagnose issue, print statements were added in sections to confirm where the issue begins.
+Started with adding print statements at end to first check if main method is passing the correct arguments to the
+sequence method.
+
+Updated method with print statements:
+
+public static void sequence(PicoController pico, String s) {
+
+        System.out.println(s); // for testing.
+
+        if (s.equals(" ")) {
+            pico.ledOff();
+            pico.sleep(BETWEEN_WORDS);
+        }
+        else {
+            for (int i = 0; i < s.length(); i++) {
+                char currentSymbol = s.charAt(i);
+
+                System.out.println(currentSymbol); // for testing.
+
+                if (currentSymbol == '.') {
+                    shortBlink(pico);
+                }
+                else if (currentSymbol == '-') {
+                    longBlink(pico);
+                }
+            }
+            pico.sleep(BETWEEN_CHARACTERS);
+        }
+    }
+
+-----
+Console Output (InitIal Test):
+-----
+Connecting to Pico...
+Connected to Pico on COM4
+Connected successfully.
+
+Please input the message you wish to translate to morse code (no special characters):
+sos
+...
+.
+.
+.
+---
+-
+-
+-
+...
+.
+.
+.
+Do you wish to continue (y/n)?
+y
+Please input the message you wish to translate to morse code (no special characters):
+o
+---
+-
+-
+-
+Do you wish to continue (y/n)?
+n
+Exiting Application...
+
+
+After analyzing the output, it was determined that there was no logical error up to this section of the program.
+-----------------------------------
+
+Solution: It was concluded that the source of error was that the Pico and Java program was out of sync. Initially,
+          the program utilized the Pico's hardware timer to control the onboard LED. When the command pico.sleep()
+          was executed, it caused the main Java program thread to pause while the hardware would continue to run
+          independently. This latency led to the software and hardware falling out of sync, leaving the LED to
+          blink at incorrect intervals.
+
+          To solve this issue, the use of the Pico's hardware timer was removed. Both the shortBlink() and
+          longBlink() methods were changed to the following (please review commit dad9a79 for previous code):
+
+    public static void shortBlink(PicoController pico){
+        pico.ledOn();
+        pico.sleep(DOT_TIME);
+
+        pico.ledOff();
+        pico.sleep(BETWEEN_ELEMENTS);
+    }
+
+    public static void longBlink(PicoController pico){
+        pico.ledOn();
+        pico.sleep(DASH_TIME);
+
+        pico.ledOff();
+        pico.sleep(BETWEEN_ELEMENTS);
+    }
+}
+
+Once changes were made, the Pico and software were able to run in sync and produce the correct morse code message.
+The added print statements in the sequence method was kept to ensure the written output (which was translated by
+hand to ensure accuracy) matched with the blinks produced by the Pico LED. No other issues were found during
+testing.
+
+-----
+Console output after removing hardware timer and extended testing:
+-----
+Connecting to Pico...
+Connected to Pico on COM4
+Connected successfully.
+
+Please input the message you wish to translate to morse code (no special characters):
+sos
+...
+.
+.
+.
+---
+-
+-
+-
+...
+.
+.
+.
+Do you wish to continue (y/n)?
+SOS
+Invalid input. Try again.
+Do you wish to continue (y/n)?
+y
+Please input the message you wish to translate to morse code (no special characters):
+SOS
+...
+.
+.
+.
+---
+-
+-
+-
+...
+.
+.
+.
+Do you wish to continue (y/n)?
+y
+Please input the message you wish to translate to morse code (no special characters):
+Test 123
+-
+-
+.
+.
+...
+.
+.
+.
+-
+-
+
+.----
+.
+-
+-
+-
+-
+..---
+.
+.
+-
+-
+-
+...--
+.
+.
+.
+-
+-
+Do you wish to continue (y/n)?
+y
+Please input the message you wish to translate to morse code (no special characters):
+Hello World!
+Invalid character element detected, skipping to next character...
+....
+.
+.
+.
+.
+.
+.
+.-..
+.
+-
+.
+.
+.-..
+.
+-
+.
+.
+---
+-
+-
+-
+
+.--
+.
+-
+-
+---
+-
+-
+-
+.-.
+.
+-
+.
+.-..
+.
+-
+.
+.
+-..
+-
+.
+.
+Do you wish to continue (y/n)?
+n
+Exiting Application...
+
+Process finished with exit code 0
+
+-----
+Console Output Without Testing Print Statements:
+-----
+
+Connecting to Pico...
+Connected to Pico on COM4
+Connected successfully.
+
+Please input the message you wish to translate to morse code (no special characters):
+sos
+Do you wish to continue (y/n)?
+m
+Invalid input. Try again.
+Do you wish to continue (y/n)?
+1]
+Invalid input. Try again.
+Do you wish to continue (y/n)?
+y
+Please input the message you wish to translate to morse code (no special characters):
+TEST 123
+Do you wish to continue (y/n)?
+y
+Please input the message you wish to translate to morse code (no special characters):
+Hello World!
+Invalid character element detected, skipping to next character...
+Do you wish to continue (y/n)?
+n
+Exiting Application...
+
+Process finished with exit code 0
