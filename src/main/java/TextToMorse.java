@@ -38,6 +38,8 @@ public class TextToMorse {
 
             // TODO 2: clean string input (use created method).
 
+            char[] cleanMessage = cleanInput(message);
+
             // TODO 3: for loop to iterate through the string and get the corresponding character value in morse code.
             //       save each new value as an array of strings (implement in convertToMorse() method).
             //       if encounter a space: save it in the same position as where it is in the original string.
