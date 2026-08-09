@@ -16,7 +16,7 @@ public class MorseDirectory {
         morseMap.put('c', "-.-.");
         morseMap.put('d', "-..");
         morseMap.put('e', ".");
-        morseMap.put('f', "...");
+        morseMap.put('f', "..-.");
         morseMap.put('g', "--.");
         morseMap.put('h', "....");
         morseMap.put('i', "..");

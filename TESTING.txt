@@ -260,3 +260,38 @@ n
 Exiting Application...
 
 Process finished with exit code 0
+
+
+Issue 2 --> Continuation Rigidity
+
+In this code, when prompting the user to see if they would like to continue, the application only accepted "y"
+and "n" as valid inputs. This section of code was changed so that it will now accept the same inputs regardless
+of capitalization.
+
+In order to follow the same method of cleaning the inputs, the method cleanInput() was altered so that it returns
+a string variable rather than a character array. The following is the new method (please see commit 88e19bf to
+see previous iteration).
+
+  private static String cleanInput(String s){
+        return s.toLowerCase().trim();
+    }
+
+The following line in the main method, where the user's message is being translated into a character array (line
+42) was changed to the following:
+
+char[] cleanMessage = (cleanInput(message)).toCharArray();
+
+
+Issue 3 --> Changing Access Modifiers
+
+In all previous iterations of TextToMorse, the method access modifiers used were public. To ensure better data
+safety, these access modifiers were changed to private so that other applications cannot access these methods.
+
+When testing, no issues were found.
+
+
+Issue 4 --> Error in MorseDirectory.java
+
+A correction to the morse code translations was made (line 19).
+
+morseMap.put('f', "..."); changed to morseMap.put('f', "..-.");

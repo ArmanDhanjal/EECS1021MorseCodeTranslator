@@ -39,7 +39,7 @@ public class TextToMorse {
 
             // (Complete) TODO 2: clean string input (use created method).
 
-            char[] cleanMessage = cleanInput(message);
+            char[] cleanMessage = (cleanInput(message)).toCharArray();
 
             // (Complete) TODO 3: for loop to iterate through the string and get the corresponding character value in morse code.
             //       save each new value as an array of strings (implement in convertToMorse() method).
@@ -59,10 +59,12 @@ public class TextToMorse {
             while (!valid)
             {
                 System.out.println("Do you wish to continue (y/n)?");
-                contAns = scanner.nextLine();
+                contAns = scanner.nextLine().trim().toLowerCase();
 
-                if (contAns.equals("y") ||  contAns.equals("n")) {
-                    if (contAns.equals("n")) {
+                //char cleanContAns = cleanInput(contAns.charAt(0));
+
+                if (contAns.equalsIgnoreCase("y") || contAns.equalsIgnoreCase("n")) {
+                    if (contAns.equalsIgnoreCase("n")) {
                         cont = false;
                         System.out.println("Exiting Application...");
                     }
@@ -76,14 +78,14 @@ public class TextToMorse {
     }
 
     // Method is used to clean the string input, then convert it into a character array for simpler iterate.
-    private static char[] cleanInput(String s){
-        return s.toLowerCase().trim().toCharArray();
+    private static String cleanInput(String s){
+        return s.toLowerCase().trim();
     }
 
     // Method returns a list so to allow program to differentiate between each letter/number.
     //      - each original letter (char) gets converted to a string, and each string is an individual entry.
     //      - can use nexted for loops: 1 loop for each list entry, the other for iterate through the string.
-    public static List<String> convertToMorse(char[] c, MorseDirectory directory){
+    private static List<String> convertToMorse(char[] c, MorseDirectory directory){
         List<String> translated = new ArrayList<>();
 
         for (char currentChar : c) {
@@ -105,7 +107,7 @@ public class TextToMorse {
     }
 
     // Method to instruct the pico of what the blink sequence will be.
-    public static void sequence(PicoController pico, String s) {
+    private static void sequence(PicoController pico, String s) {
         if (s.equals(" ")) {
             pico.ledOff();
             pico.sleep(BETWEEN_WORDS);
@@ -126,7 +128,7 @@ public class TextToMorse {
     }
 
     // Method to tell pico to execute a short blink for dots.
-    public static void shortBlink(PicoController pico){
+    private static void shortBlink(PicoController pico){
         pico.ledOn();
         pico.sleep(DOT_TIME);
 
@@ -135,7 +137,7 @@ public class TextToMorse {
     }
 
     // Method to tell pico to execute a short blink for dashes.
-    public static void longBlink(PicoController pico){
+    private static void longBlink(PicoController pico){
         pico.ledOn();
         pico.sleep(DASH_TIME);
 
