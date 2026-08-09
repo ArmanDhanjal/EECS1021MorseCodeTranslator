@@ -51,6 +51,11 @@ public class TextToMorse {
             // TODO 4: iterate through new array and use the pico's onboard LED to blink, using the constants above.
             //       if encounter a space: ensure led is off and pause for BETWEEN_WORDS ms.
 
+            for (String currentSequence : morseMessage) {
+                sequence(pico, currentSequence);
+            }
+
+            // Ask user if they would like to continue.
             while (!valid)
             {
                 System.out.println("Do you wish to continue (y/n)?");
@@ -99,13 +104,44 @@ public class TextToMorse {
         return translated;
     }
 
+    // Method to instruct the pico of what the blink sequence will be.
+    public static void sequence(PicoController pico, String s) {
+        if (s.equals(" ")) {
+            pico.ledOff();
+            pico.sleep(BETWEEN_WORDS);
+        }
+        else {
+            for (int i = 0; i < s.length(); i++) {
+                char currentSymbol = s.charAt(i);
+
+                if (currentSymbol == '.') {
+                    shortBlink(pico);
+                }
+                else if (currentSymbol == '-') {
+                    longBlink(pico);
+                }
+            }
+            pico.sleep(BETWEEN_CHARACTERS);
+        }
+    }
+
     // Method to tell pico to execute a short blink for dots.
     public static void shortBlink(PicoController pico){
+        pico.timerStart(DOT_TIME, "TOGGLE");
+        pico.sleep(DOT_TIME);
 
+        pico.timerStop();
+        pico.ledOff();
+        pico.sleep(BETWEEN_ELEMENTS);
     }
 
     // Method to tell pico to execute a short blink for dashes.
     public static void longBlink(PicoController pico){
+        pico.timerStart(DASH_TIME, "TOGGLE");
+        pico.sleep(DASH_TIME);
 
+        pico.timerStop();
+        pico.ledOff();
+        pico.sleep(BETWEEN_ELEMENTS);
     }
 }
