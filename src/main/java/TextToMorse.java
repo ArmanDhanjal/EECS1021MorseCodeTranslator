@@ -11,12 +11,13 @@ public class TextToMorse {
     private static final int BETWEEN_WORDS = 1400; // Time the LED is off between whole words (spaces).
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in); // Initialize the scanner.
 
-        MorseDirectory directory = new MorseDirectory();
+        MorseDirectory directory = new MorseDirectory(); // Create the morse code directory as an object.
 
-        PicoController pico = new PicoController();
+        PicoController pico = new PicoController(); // Create the pico object.
 
+        // Ensure proper connection to the pico.
         System.out.println("Connecting to Pico...");
         if (!pico.connect()) {
             System.err.println("ERROR: Could not connect to Pico.");
@@ -25,6 +26,7 @@ public class TextToMorse {
         }
         System.out.println("Connected successfully.\n");
 
+        // Initialize variables for user control over the continued use of the application.
         boolean cont = true;
         boolean valid;
         String contAns;
@@ -32,24 +34,25 @@ public class TextToMorse {
         while (cont) {
             valid = false;
 
-            // (Complete) TODO 1: Ask user to input a string of what they want translated to morse code.
+            // Ask the user to input a string of what they want translated to morse code.
 
             System.out.println("Please input the message you wish to translate to morse code (no special characters):");
             String message = scanner.nextLine();
 
-            // (Complete) TODO 2: clean string input (use created method).
+            // Clean string input and convert it into a character array for easier iteration.
 
             char[] cleanMessage = (cleanInput(message)).toCharArray();
 
-            // (Complete) TODO 3: for loop to iterate through the string and get the corresponding character value in morse code.
-            //       save each new value as an array of strings (implement in convertToMorse() method).
-            //       if encounter a space: save it in the same position as where it is in the original string.
-            //       if encounter a special character (ex $, %, etc): getter method will return null; do not add to array.
+            // Use a loop to iterate through the string and get the corresponding character value in morse code.
+            //       - Saves each new value as an array of strings (implement in convertToMorse() method).
+            //       - If encounter a space: save it in the same position as where it is in the original string.
+            //       - If encounter a special character (ex $, %, etc.): getter method will return null;
+            //              - Program will not add character to the array and will inform user of this issue.
 
             List<String> morseMessage = convertToMorse(cleanMessage, directory);
 
-            // TODO 4: iterate through new array and use the pico's onboard LED to blink, using the constants above.
-            //       if encounter a space: ensure led is off and pause for BETWEEN_WORDS ms.
+            // Iterate through new array and use the pico's onboard LED to blink, using the constants above.
+            //       - If encountering a space: ensure led is off and pause for BETWEEN_WORDS ms.
 
             for (String currentSequence : morseMessage) {
                 sequence(pico, currentSequence);
@@ -59,12 +62,10 @@ public class TextToMorse {
             while (!valid)
             {
                 System.out.println("Do you wish to continue (y/n)?");
-                contAns = scanner.nextLine().trim().toLowerCase();
+                contAns = cleanInput(scanner.nextLine());
 
-                //char cleanContAns = cleanInput(contAns.charAt(0));
-
-                if (contAns.equalsIgnoreCase("y") || contAns.equalsIgnoreCase("n")) {
-                    if (contAns.equalsIgnoreCase("n")) {
+                if (contAns.equals("y") || contAns.equals("n")) {
+                    if (contAns.equals("n")) {
                         cont = false;
                         System.out.println("Exiting Application...");
                     }
@@ -83,8 +84,8 @@ public class TextToMorse {
     }
 
     // Method returns a list so to allow program to differentiate between each letter/number.
-    //      - each original letter (char) gets converted to a string, and each string is an individual entry.
-    //      - can use nexted for loops: 1 loop for each list entry, the other for iterate through the string.
+    //      - Each original letter (char) gets converted to a string, and each string is an individual entry.
+    //      - One loop for each list entry, the other for iterate through the string.
     private static List<String> convertToMorse(char[] c, MorseDirectory directory){
         List<String> translated = new ArrayList<>();
 
@@ -106,7 +107,7 @@ public class TextToMorse {
         return translated;
     }
 
-    // Method to instruct the pico of what the blink sequence will be.
+    // Method to coordinate the LED blinks with the passed morse sequence.
     private static void sequence(PicoController pico, String s) {
         if (s.equals(" ")) {
             pico.ledOff();
