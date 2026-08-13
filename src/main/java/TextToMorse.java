@@ -78,14 +78,19 @@ public class TextToMorse {
         }
     }
 
-    // Method is used to clean the string input, then convert it into a character array for simpler iterate.
+    /**
+     * Method is used to clean the string input, then convert it into a character array for simpler iterate.
+     * @param s String.
+     */
     private static String cleanInput(String s){
         return s.toLowerCase().trim();
     }
 
-    // Method returns a list so to allow program to differentiate between each letter/number.
-    //      - Each original letter (char) gets converted to a string, and each string is an individual entry.
-    //      - One loop for each list entry, the other for iterate through the string.
+    /**
+     * Method returns a list so to allow program to differentiate between each letter/number.
+     * @param c Character array.
+     * @param directory HashMap of morse code translations.
+     */
     private static List<String> convertToMorse(char[] c, MorseDirectory directory){
         List<String> translated = new ArrayList<>();
 
@@ -107,7 +112,11 @@ public class TextToMorse {
         return translated;
     }
 
-    // Method to coordinate the LED blinks with the passed morse sequence.
+    /**
+     * Method to coordinate the LED blinks with the passed morse sequence.
+     * @param pico PicoController object.
+     * @param s String containing morse code sequence.
+     */
     private static void sequence(PicoController pico, String s) {
         if (s.equals(" ")) {
             pico.ledOff();
@@ -128,7 +137,10 @@ public class TextToMorse {
         }
     }
 
-    // Method to tell pico to execute a short blink for dots.
+    /**
+     * Method to tell pico to execute a short blink for dots.
+     * @param pico PicoController object.
+     */
     private static void shortBlink(PicoController pico){
         pico.ledOn();
         pico.sleep(DOT_TIME);
@@ -137,7 +149,10 @@ public class TextToMorse {
         pico.sleep(BETWEEN_ELEMENTS);
     }
 
-    // Method to tell pico to execute a short blink for dashes.
+    /**
+     * Method to tell pico to execute a short blink for dashes.
+     * @param pico PicoController object.
+     */
     private static void longBlink(PicoController pico){
         pico.ledOn();
         pico.sleep(DASH_TIME);

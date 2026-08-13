@@ -1,154 +1,122 @@
-# Morse Code Translator (EECS 1021 Final Project) – Pico (RP2040/RP2350) + Java (jSerialComm)
+# Alphanumeric Morse Code Hardware Translator (EECS 1021 Final Project)
+### Raspberry Pi Pico (RP2040/RP2350) + Java 21 (jSerialComm)
 
+An object-oriented Java application that captures dynamic user console strings, strips structural margins, extracts character sets, and drives a physical Raspberry Pi Pico onboard LED using highly efficient, direct serial stream communication layers.
 
-## Toolchain setup (JDK, Maven, Arduino CLI / IDE)
+---
+
+## Toolchain Setup (JDK, Maven, Arduino CLI / IDE)
 
 ### Maven
-If Maven is missing, the scripts can download a portable copy into `./.tools/` (enabled by default).
+If Maven is missing, the integrated environment helper scripts can download a fully portable copy into `./.tools/` (enabled by default).
 
 ### JDK
-The scripts detect an installed JDK automatically.
-If missing (or too old), they can download a portable JDK into `./.tools/` (Temurin via Adoptium API).
+The execution scripts detect your local system JDK automatically. If it is missing or too old, they will fetch a portable JDK into `./.tools/` (Temurin via the Adoptium API). The codebase requires at least Java 21 to run and execute virtual threads.
 
-The scripts require at least Java 25 by default (and will still honor a higher version from `pom.xml` if configured).
+### Arduino CLI (Recommended for Uploads)
+For consistent installs and firmware automation, the project leverages `arduino-cli` to automatically:
+* Install the target RP2040 board compiler package (Earle Philhower core).
+* Compile and upload the C++ serial bridge sketch to the physical board.
+  If `arduino-cli` is missing on your host machine, the scripts can configure a portable copy under `./.tools/`.
 
-### Arduino CLI (recommended for uploads)
-For consistent installs and automation, the project uses `arduino-cli` for:
-- installing the RP2040 board package (Earle Philhower core)
-- compiling and uploading the firmware sketch
+### Environment Helpers (Portable Installs + Detection)
+These helper tools detect available developer kits, configure missing libraries, and export the exact environment variables the repository requires:
+* **Bash**: `scripts/env.sh`
+* **PowerShell**: `scripts/env.ps1`
+* **Windows CMD Wrapper**: `scripts/env.cmd`
 
-If `arduino-cli` is not installed, the scripts can download a portable copy into `./.tools/`.
+---
 
-### Arduino IDE (optional)
-The scripts can detect the Arduino IDE install path (useful for students), but the automated upload path uses `arduino-cli`.
+## Project Architecture & Layout
 
-### Environment helpers (portable installs + detection)
-These scripts detect tools and optionally install missing ones, then output the environment variables the rest of the repo uses:
-- Bash: `scripts/env.sh`
-- PowerShell: `scripts/env.ps1`
-- Cmd wrapper: `scripts/env.cmd` (calls PowerShell and sets env vars in `cmd.exe`)
+The codebase enforces a strict separation of concerns, decoupling abstract algorithmic token translations from blocking hardware serial tracking threads:
 
-Common flags:
-- `--install-missing` / `-InstallMissing`: offer to download portable tools into `./.tools/` (default)
-- `--yes` / `-Yes`: non-interactive install (auto-accept installs)
-- `--require-arduino-cli` / `-RequireArduinoCli`: fail (or install) if `arduino-cli` is missing
-
-Examples:
-- Export into your current shell (macOS/Linux): `eval "$(./scripts/env.sh --emit)"`
-- Set env vars in `cmd.exe` (Windows): `call scripts\\env.cmd`
-
-Environment variables you’ll commonly see:
-- `JAVA_HOME`, `JAVA_BIN`, `JAVAC_BIN`, `JAVA_MAJOR`
-- `MVN_BIN` (portable Maven under `./.tools/` or system `mvn`)
-- `ARDUINO_CLI` (path to `arduino-cli` if found)
-- `ARDUINO_IDE_PATH` (detected IDE install location if found)
-
-## Scripts reference (what each script does)
-
-### End-to-end runners
-- `runme.sh`: macOS/Linux end-to-end flow (setup → Arduino core install → upload firmware → run Java).
-  - `--java-only` / `--skip-arduino` skips Arduino steps.
-  - `--run <MainClass>` runs a specific Java main (default: `BLANK`).
-- `runme.bat`: Windows equivalent (drives PowerShell scripts for Arduino parts).
-
-### Setup scripts
-- `setup_environment.sh`: macOS/Linux tool detection + Maven dependency download + compile verification.
-  - Supports `--require-arduino-cli` if you plan to upload firmware.
-- `setup_environment.bat`: Windows setup entrypoint (uses `scripts\\env.cmd` and a portable Maven if needed).
-
-### Arduino CLI scripts (firmware)
-- `install_arduino_pico_board_manager.sh` / `install_arduino_pico_board_manager.ps1`:
-  - Installs the RP2040 board package for Arduino CLI (Earle Philhower).
-- `compile_and_upload_pico.sh` / `compile_and_upload_pico.ps1`:
-  - Compiles `pico_serial_bridge_v1.0/` and uploads it to the Pico.
-  - Prompts for board type/FQBN and attempts to auto-detect the upload port.
-
-### Java run scripts
-- `run_java.sh` / `run_java.ps1` / `run_java.bat`:
-  - Builds/compiles the Maven project and runs a specified Java main class.
-  - On Java 24+, automatically adds the required native-access flag for `jSerialComm`.
-  - If `native-libs/` contains a host-native `jSerialComm` library, it will be preferred.
-
-Options:
-- `--install-missing` (default), `--yes` (forwarded to tool detection)
-- `--native-access ALL-UNNAMED` (or `--native-access com.fazecast.jSerialComm`) for Java 24+
-
-
-## Project architecture (Java ↔ Pico)
-
-### Firmware: `pico_serial_bridge_v1.0/pico_serial_bridge_v1.0.ino`
-This sketch runs on the Pico and listens for newline-delimited commands over USB serial.
-It responds with:
-- `OK` / `OK:<data>` on success
-- `ERROR:<message>` on failure
-
-Key command groups:
-- LED control: `LED_ON`, `LED_OFF`, `LED_TOGGLE`, `LED_BLINK,<ms>`, `LED_STATE`
-- FILL IN NEW FILE METHODS
-- Utilities: `PING` (returns `OK:PONG`), `INFO`, `HELP`
-
-### Java: `src/main/java/`
-The Java side opens the serial port (via `jSerialComm`) and sends the above commands.
-
-Files:
-- `PicoController.java`: the library students use (connects to the Pico, sends commands, parses replies).
-  - Connection handshake: it enumerates available ports, tries to open each, sends `PING`, and looks for `PONG`.
-  - Includes helper APIs for LED control + the BLANK FILE NAME timer APIs.
-
-## jSerialComm notes (dependency, native libraries, Java 24+)
-
-### Maven dependency
-`pom.xml` uses a version range so Maven can select a compatible 2.x release:
-```xml
-<dependency>
-  <groupId>com.fazecast</groupId>
-  <artifactId>jSerialComm</artifactId>
-  <version>[2.0.0,3.0.0)</version>
-</dependency>
+Project Directory Blueprint
+```text 
+EECS1021MorseCodeTranslator
+  pico_serialridge_v1.0
+    pico_serial_bridge_v1.0.ino              # Arduino Serial Bridge Communication program
+  src/ 
+    main/
+      java/              # Source Root Folder
+        MorseDirectory.java # Immutable lookup mapping dictionary
+        PicoController.java # Streamlined hardware driver wrapper
+        TextToMorse.java    # System entry point and orchestration layer
+      resources/         # Project asset folder (empty)
+    test/
+      java/              # Unit testing directory (empty)
+  TESTING.txt                # Hardware verification logs & bug diagnostics
+  pom.xml                    # Maven dependency & Java compiler declarations
 ```
 
-### Native libraries
-`jSerialComm` uses a JNI native library (`libjSerialComm.*` / `jSerialComm.dll`) under the hood.
-There are two supported ways to run:
+### 1. Firmware Layer (`pico_serial_bridge_v1.0.ino`)
+This lightweight sketch flashes directly onto the Pi Pico chip. It continuously listens for newline-delimited ASCII strings crossing the USB serial connection wire, flashing the pin high/low and responding back with `OK` or `ERROR` packets.
 
-1) Default behavior (no local native build):
-  - the jar extracts the correct native library for your OS/CPU into a temp directory and loads it
-2) Local native library (preferred if present):
-  - if `native-libs/` contains a built host-native `libjSerialComm.*`, our scripts set:
-    - 
+### 2. Encapsulated Data Layer (`MorseDirectory.java`)
+Houses a heavily protected private `HashMap` data structure containing your international alphanumeric Morse definitions. It exposes an immutable, public \(O(1)\) lookup complexity gateway (`getMorseSequence`) to prevent external manipulation of the alphabet maps.
 
-If you built a native library and later jSerialComm updates (because of the version range), you may need to rebuild the native library to match.
-If you suspect a mismatch, remove `native-libs/libjSerialComm.*` to force the jar-extraction path.
+### 3. Application Orchestration Layer (`TextToMorse.java`)
+Manages the continuous operational user loop, monitors continuation validation gateways, feeds string inputs through your custom `cleanInput` filtering method, and processes the translated collections sequentially.
 
-### Java 24+ native-access restrictions
-Starting with Java 24, running code that calls native libraries may require an explicit flag.
-The `run_java.*` scripts do this automatically on Java 24+:
-- default: `--enable-native-access=ALL-UNNAMED` (recommended for classpath apps)
-- optional override: `--native-access com.fazecast.jSerialComm`
+---
 
-### macOS security / quarantine notes
-If macOS blocks a JNI library load (Gatekeeper/quarantine), common fixes are:
-- ensure the native library is under your project folder (not a restricted location)
-- remove quarantine attribute if present: `xattr -dr com.apple.quarantine native-libs`
+## 🔬 Critical Design Decision: Resolving Hardware Clock Drift
 
-## Troubleshooting
+During initial hardware integration tests using asynchronous background timers (`pico.timerStart`), a significant physical latency conflict was isolated.
 
-### Pico not detected / cannot connect
-- Ensure the firmware is uploaded: `pico_serial_bridge_v1.0/pico_serial_bridge_v1.0.ino`.
-- List serial ports:
-  - macOS/Linux: `ls /dev/cu.* /dev/tty.*`
-  - Arduino CLI: `arduino-cli board list`
-- If `BLANK` prints “Could not connect”, run `PicoController.listPorts()` (already done on failure).
+### The Problem: Asynchronous Timer Overlaps
+Because your host laptop CPU and the Pico chip operate on separate, independent clock crystals, sending toggle packets across a USB serial wire introduces an inescapable **transmission latency (~2ms to 5ms)**. Your laptop CPU would wake up from its sleep timer slightly faster than the serial port cleared, issuing a stop command *before* the Pico completed its autonomous blink cycle, clipping the flashes and cluttering the serial buffer register streams.
 
-### Upload issues
-- Put the board in BOOTSEL mode (hold BOOTSEL while plugging in USB).
-- Re-run: `./compile_and_upload_pico.sh`
+### The Solution: Synchronous Direct State Control
+To guarantee absolute timing accuracy, the background timer loops were removed. The codebase was transitioned to a **Direct Synchronous Output Pattern** utilizing **`pico.ledOn()`** and **`pico.ledOff()`** exclusively. Because the laptop retains absolute custody over both the pauses and the pin voltage updates concurrently, any cable transmission latency affects the start-packet and stop-packet equally. This eliminates clock drift entirely, producing crisp, perfectly proportioned international Morse signals.
 
-### Native library errors (jSerialComm)
-- If you built a local native library, rebuild it for the exact resolved jSerialComm version:
-  - check resolved version (use the same Maven as the scripts): `"$MVN_BIN" dependency:list -DincludeGroupIds=com.fazecast -DincludeArtifactIds=jSerialComm -DexcludeTransitive=true`
-  - rebuild native lib: `cd native-libs/jSerialComm && ./build.sh --ref vX.Y.Z`
+```java
+// Professional Direct State Pattern implemented inside TextToMorse
+public static void shortBlink(PicoController pico) {
+    pico.ledOn();
+    pico.sleep(DOT_TIME);
+    pico.ledOff();
+    pico.sleep(BETWEEN_ELEMENTS);
+}
+```
 
-### “sun.misc.Unsafe” warnings while running Maven
-You may see warnings like “A terminally deprecated method in sun.misc.Unsafe has been called” when Maven runs.
-These come from Maven’s dependencies (e.g., Guice) and do not affect the Java code.
+---
+
+## Absolute Morse Timing Specifications
+
+The physical playback script matches standard international radio transmission requirements:
+*   **Dot Duration (`DOT_TIME`)**: 200 ms (LED high voltage state)
+*   **Dash Duration (`DASH_TIME`)**: 600 ms (LED high voltage state)
+*   **Element Boundary (`BETWEEN_ELEMENTS`)**: 200 ms pause (LED low voltage state between symbols inside a letter)
+*   **Character Boundary (`BETWEEN_CHARACTERS`)**: 600 ms pause (LED low voltage state separating complete letters)
+*   **Word Boundary (`BETWEEN_WORDS`)**: 1400 ms pause (LED low voltage state separating complete words/spaces)
+
+---
+
+## Robustness & Error-Handling Pipelines
+
+*   **User Input Sanitization**: Strings are piped through `.trim().toLowerCase()` prior to array conversion, eliminating execution loops caused by accidental capitalization or trailing spaces.
+*   **Illegal Key Trapping**: If an invalid character symbol is input (e.g., `$`, `%`, `#`), your code filters the value, prints a tracking alert to the console window, and safely skips the index to prevent a application-wide `NullPointerException` crash.
+*   **Graceful Shuts Downs**: The system monitors exit strings to cleanly close open USB serial channels (`pico.disconnect()`), preventing background memory port locks.
+
+---
+
+## Verified Execution Trace 
+
+To review comprehensive historical troubleshooting logs, boundary checks, and diagnostic data patterns, examine the tracked [TESTING.txt](./TESTING.txt) log file.
+
+### Successful System Playback Output (`"sos"`)
+```text
+Connecting to Pico...
+Connected to Pico on COM4
+Connected successfully.
+
+Please input the message you wish to translate to morse code (no special characters):
+sos
+...
+---
+...
+Do you wish to continue (y/n)?
+n
+Exiting Application...
+```

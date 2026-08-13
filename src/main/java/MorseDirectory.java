@@ -2,17 +2,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MorseDirectory {
-    // Hash map encapsulated as private to avoid modification from outside the class, and final to stop any attempts to
-    // change the variable.
+    /**
+     * Hash map encapsulated as private to avoid modification from outside the class, and final to stop any attempts to
+     * change the variable.
+     */
+
     private final Map<Character, String> morseMap;
 
-    // Constructor to allow other classes to initialize the hash map as an object.
+    /**
+     * Constructor to allow other classes to initialize the hash map as an object.
+     */
     public MorseDirectory(){
         this.morseMap = new HashMap<>();
         initializeDirectory();
     }
 
-    // Populates the hash map with each character and their corresponding morse code.
+    /**
+     * Populates the hash map with each character and their corresponding morse code.
+     */
     private void initializeDirectory(){
         // All entries are lowercase for mapping and lookup.
         morseMap.put('a', ".-");
@@ -55,7 +62,11 @@ public class MorseDirectory {
         morseMap.put('9', "----.");
     }
 
-    // Public getter method that allows any class that uses the hash map to search for values using the given key.
+    /**
+     * Public getter method that allows any class that uses the hash map to search for values using the given key.
+     * @param c Key to find in HashMap.
+     * @return Associated value (String), or null if the key is not found in the HashMap.
+     */
     public String getMorseSequence(char c){
         return morseMap.getOrDefault(c, null);
     }
