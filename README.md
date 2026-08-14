@@ -3,6 +3,11 @@
 
 An object-oriented Java application that captures dynamic user console strings, strips structural margins, extracts character sets, and drives a physical Raspberry Pi Pico onboard LED using highly efficient, direct serial stream communication layers.
 
+Link to video demonstration and explanation:
+https://youtu.be/hCXxWO8D-ws
+Link to GitHub repository and downloadable files:
+https://github.com/ArmanDhanjal/EECS1021MorseCodeTranslator
+
 ---
 
 ## Toolchain Setup (JDK, Maven, Arduino CLI / IDE)
